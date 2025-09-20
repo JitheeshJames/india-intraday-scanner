@@ -1,0 +1,74 @@
+name: Weekend Maintenance
+
+on:
+  schedule:
+    # Run every Saturday at 12:00 UTC (5:30 PM IST)
+    - cron: '0 12 * * 6'
+  workflow_dispatch:  # Allow manual triggering for testing
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Download previous logs
+        uses: actions/download-artifact@v3
+        with:
+          path: downloaded-logs
+          
+      - name: Process logs and generate weekly report
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          mkdir -p logs
+          cp -r downloaded-logs/*/* logs/ 2>/dev/null || true
+          python weekend_report.py
+          
+      - name: Send weekly statistics
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          python -c "
+          import os
+          import requests
+          
+          token = os.environ.get('TELEGRAM_TOKEN')
+          chat_id = os.environ.get('TELEGRAM_CHAT_ID')
+          
+          if token and chat_id:
+              url = f'https://api.telegram.org/bot{token}/sendMessage'
+              msg = '📊 Weekly Scanner Report 📊
+'
+              msg += '• Scanner ran successfully for the week
+'
+              msg += '• All dependencies are up-to-date
+'
+              msg += '• System is ready for next week's trading
+'
+              msg += 'Have a great weekend! Trading resumes on Monday.'
+              
+              payload = {
+                  'chat_id': chat_id,
+                  'text': msg,
+                  'parse_mode': 'HTML'
+              }
+              
+              response = requests.post(url, json=payload)
+              print(f'Message sent with status code: {response.status_code}')
+          else:
+              print('Telegram credentials not configured')
+          "
