@@ -1,0 +1,7 @@
+pandas
+numpy
+yfinance
+pytz
+pandas-market-calendars
+pyyaml
+python-telegram-bot==20.7
