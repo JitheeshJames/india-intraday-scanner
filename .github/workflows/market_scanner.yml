@@ -1,0 +1,68 @@
+name: India Market Scanner
+
+on:
+  schedule:
+    # 9:10 AM IST (3:40 UTC) - Pre-market scan
+    - cron: '40 3 * * 1-5'
+    # 10:10 AM IST (4:40 UTC) - First hourly scan
+    - cron: '40 4 * * 1-5'
+    # 11:10 AM IST (5:40 UTC)
+    - cron: '40 5 * * 1-5'
+    # 12:10 PM IST (6:40 UTC)
+    - cron: '40 6 * * 1-5'
+    # 1:10 PM IST (7:40 UTC)
+    - cron: '40 7 * * 1-5'
+    # 2:10 PM IST (8:40 UTC)
+    - cron: '40 8 * * 1-5'
+    # 3:10 PM IST (9:40 UTC) - Final hourly scan
+    - cron: '40 9 * * 1-5'
+  workflow_dispatch:  # Allow manual triggering for testing
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Get current time (IST)
+        id: time
+        run: |
+          # Get current time in IST
+          IST_TIME=$(TZ="Asia/Kolkata" date "+%H:%M:%S")
+          IST_HOUR=$(TZ="Asia/Kolkata" date "+%H")
+          IST_MINUTE=$(TZ="Asia/Kolkata" date "+%M")
+          IST_DATE=$(TZ="Asia/Kolkata" date "+%Y-%m-%d")
+          
+          echo "ist_time=$IST_TIME" >> $GITHUB_OUTPUT
+          echo "ist_hour=$IST_HOUR" >> $GITHUB_OUTPUT
+          echo "ist_minute=$IST_MINUTE" >> $GITHUB_OUTPUT
+          echo "ist_date=$IST_DATE" >> $GITHUB_OUTPUT
+          
+      - name: Run market scanner
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          IST_HOUR: ${{ steps.time.outputs.ist_hour }}
+          IST_MINUTE: ${{ steps.time.outputs.ist_minute }}
+          IST_DATE: ${{ steps.time.outputs.ist_date }}
+        run: |
+          echo "Running scan at IST time: ${{ steps.time.outputs.ist_time }}"
+          python india_dynamic_scanner.py --hour $IST_HOUR --minute $IST_MINUTE
+          
+      - name: Upload logs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: scan-logs-${{ steps.time.outputs.ist_date }}-${{ steps.time.outputs.ist_hour }}h
+          path: logs/
+          retention-days: 7
