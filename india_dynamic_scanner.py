@@ -257,12 +257,20 @@ def build_levels(p, risk_pct, capital, buffer_bp):
     return entry, stop, tgt, qty
 
 def send_tg(msg):
-    Bot(token=os.environ["TELEGRAM_TOKEN"]).send_message(
-        chat_id=os.environ["TELEGRAM_CHAT_ID"], 
-        text=msg, 
-        parse_mode="HTML", 
-        disable_web_page_preview=True
-    )
+    """Send a Telegram message using direct HTTP request (no asyncio needed)"""
+    token = os.environ["TELEGRAM_TOKEN"]
+    chat_id = os.environ["TELEGRAM_CHAT_ID"]
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    
+    params = {
+        "chat_id": chat_id,
+        "text": msg,
+        "parse_mode": "HTML"
+    }
+    
+    # Make the request and return the response
+    response = requests.get(url, params=params)
+    return response.json()
 
 def main():
     cfg = load_cfg()
