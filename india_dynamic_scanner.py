@@ -299,11 +299,10 @@ def main():
         entry, stop, tgt, qty = build_levels(p, risk_pct, capital, buf)
         rr = abs((tgt-entry)/max(entry-stop, 1e-6)) if p["bias"]=="LONG" else abs((entry-tgt)/max(stop-entry, 1e-6))
         
+        # Replace lines 302-307 with this corrected version:
         lines.append(
-            f"{p['ticker']}  <b>{p['bias']}</b>
-"
-            f"  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}
-"
+            f"{p['ticker']}  <b>{p['bias']}</b>"
+            f"  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}"
             f"  RS: {p['rs']:.3f} | VolImpulse: {p['vol_ratio']:.3f} | R:R≈{rr:.1f}x"
         )
     
