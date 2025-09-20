@@ -37,6 +37,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
+      - name: Create output directories
+        run: |
+          mkdir -p output
+          mkdir -p logs
+          
       - name: Get current time (IST)
         id: time
         run: |
@@ -61,13 +66,25 @@ jobs:
           echo "Running scan at IST time: ${{ steps.time.outputs.ist_time }}"
           python india_dynamic_scanner.py --hour $IST_HOUR --minute $IST_MINUTE
           
-      # If you need to upload any artifacts, use v4 instead of v3
+      # Generate a test file to ensure artifacts exist
+      - name: Generate test files if no outputs exist
+        run: |
+          # Create a test file in output if directory is empty
+          if [ ! "$(ls -A output 2>/dev/null)" ]; then
+            echo "{\"status\": \"No data generated during this run\"}" > output/empty-run.json
+          fi
+          
+          # Create a test log file if no logs exist
+          if [ ! "$(ls -A logs 2>/dev/null)" ]; then
+            echo "No logs generated during this run at $(date)" > logs/run-log.txt
+          fi
+          
       - name: Archive results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: scan-results
+          name: scan-results-${{ steps.time.outputs.ist_date }}
           path: |
-            results/*.json
-            logs/*.log
+            output/
+            logs/
           retention-days: 5
