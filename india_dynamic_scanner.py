@@ -20,6 +20,21 @@ def is_trading_day(date_ist):
     except Exception:
         return date_ist.weekday() < 5  # Mon-Fri
 
+def is_market_open():
+    """Check if market is currently open for trading"""
+    now = dt.datetime.now(IST)
+    
+    # Check if it's a weekday
+    if now.weekday() > 4:  # 5=Saturday, 6=Sunday
+        return False
+    
+    # Check if within trading hours (9:15 AM to 3:30 PM IST)
+    market_start = dt.time(9, 15)
+    market_end = dt.time(15, 30)
+    current_time = now.time()
+    
+    return market_start <= current_time <= market_end
+
 def fetch_active_stocks(limit=100):
     """Get the most active stocks by volume from NSE"""
     
@@ -34,7 +49,7 @@ def fetch_active_stocks(limit=100):
             data = response.json()
             df = pd.DataFrame(data.get('data', []))
             if not df.empty and 'symbol' in df.columns:
-                return df['symbol'].tolist()[:limit]
+                return [f"{s}.NS" for s in df['symbol'].tolist()][:limit]
     except Exception as e:
         print(f"NSE API fetch failed: {e}")
     
@@ -43,7 +58,7 @@ def fetch_active_stocks(limit=100):
         url = "https://archives.nseindia.com/content/fo/fo_mktlots.csv"
         df = pd.read_csv(url)
         if 'SYMBOL' in df.columns:
-            return df['SYMBOL'].tolist()[:limit]
+            return [f"{s}.NS" for s in df['SYMBOL'].tolist()][:limit]
     except Exception as e:
         print(f"NSE F&O list fetch failed: {e}")
     
@@ -252,8 +267,15 @@ def send_tg(msg):
 def main():
     cfg = load_cfg()
     
+    # Check if it's a trading day
     if not is_trading_day(dt.datetime.now(IST).date()):
-        send_tg("NSE Holiday/Closed: Scanner skipped.")
+        send_tg("NSE Holiday/Closed: Today is not a trading day.")
+        return
+        
+    # Check if market is currently open
+    if not is_market_open():
+        now = dt.datetime.now(IST)
+        send_tg(f"NSE Market Closed: Current time is {now.strftime('%H:%M:%S')} IST. Market hours are 09:15-15:30 IST, Monday-Friday.")
         return
     
     # Let user know scan started
@@ -278,8 +300,10 @@ def main():
         rr = abs((tgt-entry)/max(entry-stop, 1e-6)) if p["bias"]=="LONG" else abs((entry-tgt)/max(stop-entry, 1e-6))
         
         lines.append(
-            f"{p['ticker']}  <b>{p['bias']}</b>"
-            f"  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}"
+            f"{p['ticker']}  <b>{p['bias']}</b>
+"
+            f"  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}
+"
             f"  RS: {p['rs']:.3f} | VolImpulse: {p['vol_ratio']:.3f} | R:R≈{rr:.1f}x"
         )
     
