@@ -306,8 +306,7 @@ def main():
             f"  RS: {p['rs']:.3f} | VolImpulse: {p['vol_ratio']:.3f} | R:R≈{rr:.1f}x"
         )
     
-    send_tg("
-".join(lines))
+    send_tg(" ".join(lines))
 
 if __name__ == "__main__":
     main()
