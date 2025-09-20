@@ -31,8 +31,7 @@ def log(message, level="INFO"):
     
     # Write to log file
     with open(log_file, "a") as f:
-        f.write(log_message + "
-")
+        f.write(log_message + " ")
 
 # Constants
 IST = pytz.timezone('Asia/Kolkata')
@@ -562,16 +561,13 @@ def main():
         rr = abs((tgt-entry)/max(abs(entry-stop), 1e-6))
         
         lines.append(
-            f"{p['ticker']} <b>{p['bias']}</b>
-"
-            f"  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}
-"
+            f"{p['ticker']} <b>{p['bias']}</b>"
+            f"  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}"
             f"  RS: {p['rs']:.2f} | Vol: {p['vol_ratio']:.1f}x | R:R≈{rr:.1f}x"
         )
     
     # Send results
-    result_msg = "
-".join(lines)
+    result_msg = "".join(lines)
     log(f"Sending results with {len(picks)} picks")
     send_tg(result_msg)
 
