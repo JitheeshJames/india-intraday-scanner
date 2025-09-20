@@ -279,10 +279,8 @@ def main():
         
         lines.append(
             f"{p['ticker']}  <b>{p['bias']}</b>"
-            f"
-  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}"
-            f"
-  RS: {p['rs']:.3f} | VolImpulse: {p['vol_ratio']:.3f} | R:R≈{rr:.1f}x"
+            f"  Entry: {entry:.2f} | Stop: {stop:.2f} | Target: {tgt:.2f} | Qty: {qty}"
+            f"  RS: {p['rs']:.3f} | VolImpulse: {p['vol_ratio']:.3f} | R:R≈{rr:.1f}x"
         )
     
     send_tg("
