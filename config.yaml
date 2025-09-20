@@ -1,0 +1,7 @@
+india:
+  index: "^NSEI"                # NIFTY 50 index
+  dynamic_universe_size: 100    # How many top volume stocks to scan
+  risk_pct: 0.01                # 1% risk per trade
+  buffer_bp: 10                 # 10 basis points entry buffer
+  top_n: 3                      # Return top 3 setups max
+capital_inr: 500000             # For position sizing
