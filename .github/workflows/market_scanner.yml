@@ -14,19 +14,21 @@ on:
     - cron: '40 7 * * 1-5'
     # 2:10 PM IST (8:40 UTC)
     - cron: '40 8 * * 1-5'
-    # 3:10 PM IST (9:40 UTC) - Final hourly scan
+    # 3:10 PM IST (9:40 UTC)
     - cron: '40 9 * * 1-5'
-  workflow_dispatch:  # Allow manual triggering for testing
+    # 3:30 PM IST (10:00 UTC) - Final scan
+    - cron: '0 10 * * 1-5'
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   scan:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           
@@ -55,14 +57,17 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           IST_HOUR: ${{ steps.time.outputs.ist_hour }}
           IST_MINUTE: ${{ steps.time.outputs.ist_minute }}
-          IST_DATE: ${{ steps.time.outputs.ist_date }}
         run: |
           echo "Running scan at IST time: ${{ steps.time.outputs.ist_time }}"
           python india_dynamic_scanner.py --hour $IST_HOUR --minute $IST_MINUTE
           
-      - name: Upload logs as artifacts
-        uses: actions/upload-artifact@v3
+      # If you need to upload any artifacts, use v4 instead of v3
+      - name: Archive results
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: scan-logs-${{ steps.time.outputs.ist_date }}-${{ steps.time.outputs.ist_hour }}h
-          path: logs/
-          retention-days: 7
+          name: scan-results
+          path: |
+            results/*.json
+            logs/*.log
+          retention-days: 5
