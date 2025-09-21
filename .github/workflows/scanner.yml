@@ -1,0 +1,29 @@
+name: India Intraday Scanner
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 4,6,8,10,12,14,16 * * 1-5'  # IST 9:30, 11:30, 13:30, 15:30, 17:30, 19:30, 21:30 UTC
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest yfinance pandas numpy requests
+      - name: Run pytest
+        run: |
+          pytest tests --maxfail=1 --disable-warnings -v
+      - name: Dry run scan
+        run: |
+          python india_intraday_scanner.py --test --hour 10 --minute 0
