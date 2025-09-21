@@ -1,0 +1,11 @@
+{
+    "india": {
+        "dynamic_universe_size": 100,
+        "risk_pct": 0.5,
+        "buffer_bp": 5,
+        "min_rs_threshold": 0.0,
+        "min_volume_impulse": 1.0,
+        "index": "^NSEI"
+    },
+    "capital_inr": 100000
+}
