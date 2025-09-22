@@ -31,4 +31,4 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          python india-intraday-scanner.py --test  # remove --test for real trades
+          python india-intraday-scanner.py # remove --test for real trades
