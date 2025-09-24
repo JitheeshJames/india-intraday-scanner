@@ -3,21 +3,21 @@ name: India Market Scanner
 on:
   schedule:
     # 9:10 AM IST (3:40 UTC) - Pre-market scan
-    - cron: '40 3 * * 1-5'
+    #- cron: '40 3 * * 1-5'
     # 10:10 AM IST (4:40 UTC) - First hourly scan
     - cron: '40 4 * * 1-5'
     # 11:10 AM IST (5:40 UTC)
-    - cron: '40 5 * * 1-5'
+    #- cron: '40 5 * * 1-5'
     # 12:10 PM IST (6:40 UTC)
-    - cron: '40 6 * * 1-5'
+    #- cron: '40 6 * * 1-5'
     # 1:10 PM IST (7:40 UTC)
-    - cron: '40 7 * * 1-5'
+    #- cron: '40 7 * * 1-5'
     # 2:10 PM IST (8:40 UTC)
-    - cron: '40 8 * * 1-5'
+    #- cron: '40 8 * * 1-5'
     # 3:10 PM IST (9:40 UTC)
-    - cron: '40 9 * * 1-5'
+    #- cron: '40 9 * * 1-5'
     # 3:30 PM IST (10:00 UTC) - Final scan
-    - cron: '0 10 * * 1-5'
+    #-- cron: '0 10 * * 1-5'
   workflow_dispatch:  # Allow manual triggering
 
 jobs:
